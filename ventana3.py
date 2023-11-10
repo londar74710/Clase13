@@ -1,7 +1,8 @@
 from PyQt5 import QtGui
-from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget, QLabel, QVBoxLayout, QScrollArea, QTableWidget, QPushButton, \
-    QTableWidgetItem
+    QTableWidgetItem, QToolBar, QAction
 from cliente import Cliente
 
 class Ventana3(QMainWindow):
@@ -64,6 +65,22 @@ class Ventana3(QMainWindow):
 
         self.vertical = QVBoxLayout()
 
+        self.toolbar = QToolBar("Main toolbar")
+        self.toolbar.setIconSize(QSize(35, 35))
+        self.addToolBar(self.toolbar)
+
+        self.delete = QAction(QIcon("Imagenes/delete.png"), '&Delete', self)
+        self.delete.triggered.connect(self.accion_delete)
+        self.toolbar.addAction(self.delete)
+
+        self.add = QAction(QIcon("Imagenes/agregar.png"), '&Add', self)
+        self.add.triggered.connect(self.accion_add)
+        self.toolbar.addAction(self.add)
+
+        self.insert = QAction(QIcon("Imagenes/editar.png"), '&Insert', self)
+        self.insert.triggered.connect(self.accion_insert)
+        self.toolbar.addAction(self.insert)
+
         self.letrero1 = QLabel()
         self.letrero1.setText("Usuarios Registrados")
         self.letrero1.setFont(QFont("Arial", 12))
@@ -105,9 +122,11 @@ class Ventana3(QMainWindow):
 
         for u in usuarios:
             self.tabla.setItem(self.contador, 0, QTableWidgetItem(u.nombreCompleto))
+            self.tabla.item(self.contador, 0).setFlags(Qt.ItemIsEnabled)
             self.tabla.setItem(self.contador, 1, QTableWidgetItem(u.usuario))
             self.tabla.setItem(self.contador, 2, QTableWidgetItem(u.password))
             self.tabla.setItem(self.contador, 3, QTableWidgetItem(u.documento))
+            self.tabla.item(self.contador, 3).setFlags(Qt.ItemIsEnabled)
             self.tabla.setItem(self.contador, 4, QTableWidgetItem(u.correo))
             self.tabla.setItem(self.contador, 5, QTableWidgetItem(u.pregunta1))
             self.tabla.setItem(self.contador, 6, QTableWidgetItem(u.respuesta1))
@@ -137,3 +156,12 @@ class Ventana3(QMainWindow):
     def metodo_botonVolver(self):
         self.hide()
         self.ventanaAnterior.show()
+
+    def accion_delete(self):
+        pass
+
+    def accion_add(self):
+        pass
+
+    def accion_insert(self):
+        pass
