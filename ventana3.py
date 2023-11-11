@@ -2,7 +2,7 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget, QLabel, QVBoxLayout, QScrollArea, QTableWidget, QPushButton, \
-    QTableWidgetItem, QToolBar, QAction
+    QTableWidgetItem, QToolBar, QAction, QMessageBox
 from cliente import Cliente
 
 class Ventana3(QMainWindow):
@@ -136,32 +136,274 @@ class Ventana3(QMainWindow):
             self.tabla.setItem(self.contador, 10, QTableWidgetItem(u.respuesta3))
             self.contador += 1
 
-            self.scrollArea.setWidget(self.tabla)
+        self.scrollArea.setWidget(self.tabla)
 
-            self.vertical.addWidget(self.scrollArea)
-            self.vertical.addStretch()
+        self.vertical.addWidget(self.scrollArea)
+        self.vertical.addStretch()
 
-            self.botonVolver = QPushButton("Volver")
-            self.botonVolver.setFixedWidth(90)
-            self.botonVolver.setStyleSheet("background-color: red;"
-                                           "color: white;"
-                                           "padding: 10px;"
-                                           "margin-top: 10px;")
-            self.botonVolver.clicked.connect(self.metodo_botonVolver)
+        self.botonVolver = QPushButton("Volver")
+        self.botonVolver.setFixedWidth(90)
+        self.botonVolver.setStyleSheet("background-color: red;"
+                                       "color: white;"
+                                       "padding: 10px;"
+                                       "margin-top: 10px;")
+        self.botonVolver.clicked.connect(self.metodo_botonVolver)
 
-            self.vertical.addWidget(self.botonVolver)
+        self.vertical.addWidget(self.botonVolver)
 
-            self.fondo.setLayout(self.vertical)
+        self.fondo.setLayout(self.vertical)
 
     def metodo_botonVolver(self):
         self.hide()
         self.ventanaAnterior.show()
 
     def accion_delete(self):
-        pass
+        filaActual = self.tabla.currentRow()
+        if filaActual < 0:
+            return QMessageBox.warning(self,'Warning','Para borrar, debe seleccionar un registro')
+
+        boton = QMessageBox.question(
+            self,
+            'Confirmation',
+            '¿Está segur@ de que quieres borrar este registro?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if boton == QMessageBox.StandardButton.Yes:
+            if(
+                self.tabla.item(filaActual, 0).text() != '' and
+                self.tabla.item(filaActual, 1).text() != '' and
+                self.tabla.item(filaActual, 2).text() != '' and
+                self.tabla.item(filaActual, 3).text() != '' and
+                self.tabla.item(filaActual, 4).text() != '' and
+                self.tabla.item(filaActual, 5).text() != '' and
+                self.tabla.item(filaActual, 6).text() != '' and
+                self.tabla.item(filaActual, 7).text() != '' and
+                self.tabla.item(filaActual, 8).text() != '' and
+                self.tabla.item(filaActual, 9).text() != '' and
+                self.tabla.item(filaActual, 10).text() != ''
+            ):
+                self.file = open('datos/cliente.txt', 'rb')
+
+                usuarios = []
+
+                while self.file:
+                    linea = self.file.readline().decode('UTF-8')
+                    lista = linea.split(";")
+                    if linea == '':
+                        break
+                    u = Cliente(
+                        lista[0],
+                        lista[1],
+                        lista[2],
+                        lista[3],
+                        lista[4],
+                        lista[5],
+                        lista[6],
+                        lista[7],
+                        lista[8],
+                        lista[9],
+                        lista[10],
+                    )
+                    usuarios.append(u)
+                self.file.close()
+
+                for u in usuarios:
+                    if (
+                        u.documento == self.tabla.item(filaActual, 3).text()
+                    ):
+                        existeRegistro = True
+                        usuarios.remove(u)
+                        break
+
+                self.file = open('datos/cliente.txt', 'wb')
+
+                for u in usuarios:
+                    self.file.write(bytes(u.nombreCompleto + ";"
+                                          + u.usuario + ";"
+                                          + u.password + ";"
+                                          + u.documento + ";"
+                                          + u.correo + ";"
+                                          + u.pregunta1 + ";"
+                                          + u.respuesta1 + ";"
+                                          + u.pregunta2 + ";"
+                                          + u.respuesta2 + ";"
+                                          + u.pregunta3 + ";"
+                                          + u.respuesta3, encoding='UTF-8'))
+                self.file.close()
+                self.tabla.removeRow(filaActual)
+
+                return QMessageBox.question(
+                    self,
+                    'Confirmation',
+                    'El registro ha sido eliminado exitosamente.',
+                    QMessageBox.StandardButton.Yes
+                )
+            else:
+                self.tabla.removeRow(filaActual)
 
     def accion_add(self):
-        pass
+        ultimaFila = self.tabla.rowCount()
+        self.tabla.insertRow(ultimaFila)
+
+        self.tabla.setItem(ultimaFila, 0, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 1, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 2, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 3, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 4, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 5, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 6, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 7, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 8, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 9, QTableWidgetItem(""))
+        self.tabla.setItem(ultimaFila, 10, QTableWidgetItem(""))
 
     def accion_insert(self):
-        pass
+        filaActual = self.tabla.currentRow()
+
+        if filaActual < 0:
+            return QMessageBox.warning(self, 'Warning', 'Para ingresar, debe seleccionar un registro')
+
+        boton = QMessageBox.question(
+            self,
+            'Confirmation',
+            '¿Estas segur@ de que quieres ingresar a este nuevo registro?',
+            QMessageBox.StandardButton.Yes |
+            QMessageBox.StandardButton.No
+        )
+
+        datosVacios = True
+
+        if boton == QMessageBox.StandardButton.Yes:
+            if(
+            self.tabla.item(filaActual, 0).text() != '' and
+            self.tabla.item(filaActual, 1).text() != '' and
+            self.tabla.item(filaActual, 2).text() != '' and
+            self.tabla.item(filaActual, 3).text() != '' and
+            self.tabla.item(filaActual, 4).text() != '' and
+            self.tabla.item(filaActual, 5).text() != '' and
+            self.tabla.item(filaActual, 6).text() != '' and
+            self.tabla.item(filaActual, 7).text() != '' and
+            self.tabla.item(filaActual, 8).text() != '' and
+            self.tabla.item(filaActual, 9).text() != '' and
+            self.tabla.item(filaActual, 10).text() != ''
+            ):
+                datosVacios = False
+
+                self.file = open('datos/cliente.txt', 'rb')
+
+                usuarios = []
+
+                while self.file:
+                    linea = self.file.readline().decode('UTF-8')
+                    lista = linea.split(";")
+                    if linea == '':
+                        break
+                    u = Cliente(
+                        lista[0],
+                        lista[1],
+                        lista[2],
+                        lista[3],
+                        lista[4],
+                        lista[5],
+                        lista[6],
+                        lista[7],
+                        lista[8],
+                        lista[9],
+                        lista[10],
+                    )
+                    usuarios.append(u)
+                self.file.close()
+
+                existeRegistro = False
+                existeDocumento = False
+
+                for u in usuarios:
+                    if (
+                        u.nombreCompleto == self.tabla.item(filaActual, 0).text() and
+                        u.usuario == self.tabla.item(filaActual, 1).text() and
+                        u.password == self.tabla.item(filaActual, 2).text() and
+                        u.documento == self.tabla.item(filaActual, 3).text() and
+                        u.correo == self.tabla.item(filaActual, 4).text() and
+                        u.pregunta1 == self.tabla.item(filaActual, 5).text() and
+                        u.respuesta1 == self.tabla.item(filaActual, 6).text() and
+                        u.pregunta2 == self.tabla.item(filaActual, 7).text() and
+                        u.respuesta2 == self.tabla.item(filaActual, 8).text() and
+                        u.pregunta3 == self.tabla.item(filaActual, 9).text() and
+                        u.respuesta3 == self.tabla.item(filaActual, 10).text()
+                    ):
+                        existeRegistro = True
+
+                        return QMessageBox.warning(self, 'Warning', 'Registro duplicado, no se puede registrar')
+                        break
+
+                if not existeRegistro:
+                    for u in usuarios:
+                        if (
+                                u.documento == self.tabla.item(filaActual, 3). text()
+                        ):
+                            existeDocumento = True
+
+                            u.nombreCompleto = self.tabla.item(filaActual, 0).text()
+                            u.usuario = self.tabla.item(filaActual, 1).text()
+                            u.password = self.tabla.item(filaActual, 2).text()
+                            u.documento = self.tabla.item(filaActual, 3).text()
+                            u.correo = self.tabla.item(filaActual, 4).text()
+                            u.pregunta1 = self.tabla.item(filaActual, 5).text()
+                            u.respuesta1 = self.tabla.item(filaActual, 6).text()
+                            u.pregunta2 = self.tabla.item(filaActual, 7).text()
+                            u.respuesta2 = self.tabla.item(filaActual, 8).text()
+                            u.pregunta3 = self.tabla.item(filaActual, 9).text()
+                            u.respuesta3 = self.tabla.item(filaActual, 10).text()
+
+                            self.file = open('datos/cliente.txt', 'wb')
+                            for u in usuarios:
+                                self.file.write(bytes(u.nombreCompleto + ";"
+                                                      + u.usuario + ";"
+                                                      + u.password + ";"
+                                                      + u.documento + ";"
+                                                      + u.correo + ";"
+                                                      + u.pregunta1 + ";"
+                                                      + u.respuesta1 + ";"
+                                                      + u.pregunta2 + ";"
+                                                      + u.respuesta2 + ";"
+                                                      + u.pregunta3 + ";"
+                                                      + u.respuesta3, encoding='UTF-8'))
+                            self.file.close()
+
+                            return QMessageBox.question(
+                                self,
+                                'Confirmation',
+                                'Los datos del registro se han editado exitosamente.',
+                                QMessageBox.StandardButton.Ok
+                            )
+
+                            break
+
+                    if not existeDocumento:
+                        self.file = open('datos/cliente.txt', 'ab')
+
+                        self.file.write(bytes(self.tabla.item(filaActual, 0).text() + ";"
+                                              + self.tabla.item(filaActual, 1).text() + ";"
+                                              + self.tabla.item(filaActual, 2).text() + ";"
+                                              + self.tabla.item(filaActual, 3).text() + ";"
+                                              + self.tabla.item(filaActual, 4).text() + ";"
+                                              + self.tabla.item(filaActual, 5).text() + ";"
+                                              + self.tabla.item(filaActual, 6).text() + ";"
+                                              + self.tabla.item(filaActual, 7).text() + ";"
+                                              + self.tabla.item(filaActual, 8).text() + ";"
+                                              + self.tabla.item(filaActual, 9).text() + ";"
+                                              + self.tabla.item(filaActual, 10).text() + "\n", encoding='UTF-8'))
+
+                        self.file.seek(0, 2)
+                        self.file.close()
+
+                    return QMessageBox.question(
+                        self,
+                        'Confirmation',
+                        'Los datos del registro se han ingresado exitosamente',
+                        QMessageBox.StandardButton.Ok
+                    )
+            if datosVacios:
+                return QMessageBox.warning(self, 'Warning', 'Debe ingresar todos los datos en el registro')
+
